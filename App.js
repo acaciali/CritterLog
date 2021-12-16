@@ -7,9 +7,16 @@ import Picker from '@gregfrench/react-native-wheel-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Row, Table} from 'react-native-table-component';
 import TimeField from 'react-simple-timefield';
-import Fish from '../CritterLog/AvailableNow';
+import Fish from './src/AvailableNowFish';
+import Bugs from './src/AvailableNowBugs';
+import SeaCreatures from './src/AvailableNowSea';
+import BugPedia from './src/BugPedia';
+import FishPedia from './src/FishPedia';
+import SeaPedia from './src/SeaPedia';
+
 var PickerItem = Picker.Item;
 
+console.disableYellowBox = true; 
 
 import AppLoading from 'expo-app-loading';
 import {
@@ -17,6 +24,7 @@ import {
   Cutive_400Regular,
 } from '@expo-google-fonts/cutive'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import { render } from 'react-dom';
 
 const Stack = createStackNavigator();
 
@@ -131,6 +139,48 @@ function EnterDetails({ navigation }) {
           </SafeAreaView>
           
         </ScrollView>
+        <View style={styles.nav}>
+      <TouchableHighlight
+        style={styles.navItemSelected}
+        underlayColor='none'
+        onPress={() => navigation.navigate('Change Location and Time')}>
+        <Image
+          source={require('./assets/clock-pngrepo-com.png')}
+          style={styles.navIcon}>
+          </Image>
+          
+      </TouchableHighlight>
+      <TouchableHighlight
+      style={styles.navItem}
+      underlayColor='none'
+      onPress={() => navigation.navigate('Creatures Available Now', {
+              hemisphere: isEnabled,
+              month: selectedItem,
+              date: date,
+      })}>
+        <Image 
+        source={require('./assets/bug-net-pngrepo-com.png')}
+        style={styles.navIcon}></Image>
+      </TouchableHighlight>
+      <TouchableHighlight
+        style={styles.navItem}
+        underlayColor='none'
+        onPress={() => navigation.navigate('Critterpedia', {
+              hemisphere: isEnabled,
+              month: selectedItem,
+              date: date,
+        })}
+        >
+        <Image
+          source={{
+            uri: 'https://dodo.ac/np/images/0/0e/Menu_Critterpedia_NH_Icon.png'
+          }} 
+          style={styles.navIcon}>
+          </Image>
+          
+          
+      </TouchableHighlight>
+      </View>
         
       </SafeAreaView>
     );
@@ -140,82 +190,28 @@ function EnterDetails({ navigation }) {
 
 function AvailableNow({ route, navigation }) {
   const {hemisphere, month, date } = route.params
-  const [fish, setFish] = useState([]);
+  const [isFish, setIsFish] = useState(true);
+  const [isBugs, setIsBugs] = useState(false);
+  const [isSea, setIsSea] = useState(false); 
 
-  const getFishFromAPI = async () => {
-    const response = await fetch('https://api.nookipedia.com/nh/fish', {
-      method: 'GET',
-      headers: {
-        "X-API-KEY": "8fa4f4f6-0363-423d-9a0f-7603a7d5c3e5"
-      },
-      
-    }).then((response) => response.json())
-    .then((json) => setFish(json))
-    .catch((error) => console.error(error));
 
-    console.log(hemisphere);
-    console.log(month);
-    //const theJson = await response.json();
-    
-    //const jsonString = JSON.stringify(theJson);
-    //console.log(jsonString);
-    console.log("finished json");
-    //const fishArr = JSON.parse(jsonString);
-    //console.log(fishArr);
-    //console.log(fishArr[0].name);
-    // console.log(date);
-    let hour = date.toString().substring(16,18);
-    console.log(hour);
-    //this.setState({allFish: fishArr})  
-    //console.log(this.state.allFish)
-    console.log(fish[0]);
-  };
-
-  useEffect(() => {
-    getFishFromAPI();
-  }, []);
-
-  const getFishAvailableNowNH = async () => {
-    fishArr = getFishFromAPI();
-    currentFish = [];
-    for (var i = 0; i < fishArr.length; i++) {
-      for (var j = 0; j < fishArr[i].north.months_array.length; j++) {
-        if (month = fishArr[i].north.months_array[j]) {
-          currentFish.push(fishArr[i]);
-        }
-      }
-    }
-    this.setState({currentFish: currentFish})
-    return currentFish; 
+  setFishView = () => {
+    setIsFish(true);
+    setIsBugs(false);
+    setIsSea(false); 
   }
 
-  const getFishAvailableNowSH = async () => {
-    currentMonth = PickerItem;
-    fishArr = this.state.currentFish
-    currentFish = ["cherry salmon", "fishey"];
-    for (var i = 0; i < fishArr.length; i++) {
-      for (var j = 0; j < fishArr[i].south.months_array.length; j++) {
-        if (currentMonth = fishArr[i].south.months_array[j]) {
-          currentFish.push(fishArr[i]);
-        }
-      }
-    }
-    return currentFish;
+  setBugView = () => {
+    setIsFish(false);
+    setIsBugs(true);
+    setIsSea(false); 
   }
 
-
-  const list = () => {
-    getFishAvailableNowNH();  
-    console.log("hi?")
-    return state.currentFish.map((fish) => {
-      return (
-        <View>
-          <Text>{fish.name}</Text>
-          <Text>Hello</Text>
-        </View>
-      );
-    });
-  };
+  setSeaView = () => {
+    setIsFish(false);
+    setIsBugs(false);
+    setIsSea(true); 
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -225,205 +221,46 @@ function AvailableNow({ route, navigation }) {
       <SafeAreaView style={styles.body}>
         <SafeAreaView style={styles.creaturePicker}>
           <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setBugView(this)}
             style={styles.creaturePickerCircle}>
             <Image 
-              style={styles.creaturePickerBug}
+              style={isBugs? styles.creaturePickerBugSelected : styles.creaturePickerBug}
               source={require('./assets/GeneralBug.png')}
               />
           </TouchableHighlight>
           <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setFishView(this)}
             style={styles.creaturePickerCircle}>
             <Image 
-              style={styles.creaturePickerFish}
+              style={isFish? styles.creaturePickerFishSelected : styles.creaturePickerFish}
               source={require('./assets/GeneralFish.png')}
               />
           </TouchableHighlight>
           <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setSeaView(this)}
             style={styles.creaturePickerCircle}>
             <Image 
-              style={styles.creaturePickerCreature}
+              style={isSea? styles.creaturePickerCreatureSelected : styles.creaturePickerCreature}
               source={require('./assets/GeneralSeaCreature.png')}
               />
           </TouchableHighlight>
         </SafeAreaView>
 
-        <SafeAreaView style={styles.creatureListHeader}>
-          <Text style={styles.bodyText}>Fish</Text>
-          <Text style={styles.bodyText}>Location</Text>
-          <Text style={styles.bodyText}>Shadow</Text>
-          {/* <Image
-            style={styles.icon}
-            source={{
-              uri: 'https://dodo.ac/np/images/d/db/Cherry_Salmon_NH_Icon.png'
-            }}
-          /> */}
-        </SafeAreaView>
+        <View> 
+          {isFish ? <Fish/> : (isBugs ? <Bugs/> : <SeaCreatures/>)}
+          </View>
 
-        <Fish />
-
-        <ScrollView contentContainerStyle={styles.creatureList}>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/4/4d/Bitterling_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>River</Text>
-              <Text style={styles.bodyText}>Tiny</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/e/e2/Pale_Chub_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>River</Text>
-              <Text style={styles.bodyText}>Tiny</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/f/f2/Crucian_Carp_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>River</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/d/db/Dace_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>River</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/5/5d/Carp_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Medium</Text>
-
-            </SafeAreaView>
-            {/* <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/2/2d/Koi_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Medium</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/7/71/Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Tiny</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/0/0d/Pop-Eyed_Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Tiny</Text>
-
-            </SafeAreaView> */}
-            
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/3/35/Ranchu_Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/e/ea/Killifish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/7/7f/Sea_Bass_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Sea</Text>
-              <Text style={styles.bodyText}>Large</Text>
-
-            </SafeAreaView>
-            {/* <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/3/35/Ranchu_Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/3/35/Ranchu_Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-            </SafeAreaView>
-            <SafeAreaView style={styles.creatureListRow}>
-              <Image
-                style={styles.icon}
-                source={{
-                  uri: 'https://dodo.ac/np/images/3/35/Ranchu_Goldfish_NH_Icon.png'
-                }} 
-              />
-              <Text style={styles.bodyText}>Pond</Text>
-              <Text style={styles.bodyText}>Small</Text>
-
-              </SafeAreaView>  */}
-        </ScrollView>
         <View></View>
         
       </SafeAreaView>
       
       <View style={styles.nav}>
       <TouchableHighlight
+        style={styles.navItem}
+        underlayColor='none'
         onPress={() => navigation.navigate('Change Location and Time')}>
         <Image
           source={require('./assets/clock-pngrepo-com.png')}
@@ -432,7 +269,25 @@ function AvailableNow({ route, navigation }) {
           
       </TouchableHighlight>
       <TouchableHighlight
-        onPress={() => getFishFromAPI()}
+      style={styles.navItemSelected}
+      underlayColor='none'
+      onPress={() => navigation.navigate('Creatures Available Now', {
+              hemisphere: hemisphere,
+              month: month,
+              date: date,
+      })}>
+        <Image 
+        source={require('./assets/bug-net-pngrepo-com.png')}
+        style={styles.navIcon}></Image>
+      </TouchableHighlight>
+      <TouchableHighlight
+        style={styles.navItem}
+        underlayColor='none'
+        onPress={() => navigation.navigate('Critterpedia', {
+              hemisphere: hemisphere,
+              month: month,
+              date: date,
+        })}
         >
         <Image
           source={{
@@ -452,6 +307,119 @@ function AvailableNow({ route, navigation }) {
   
 }
 
+function Critterpedia({route, navigation}) {
+  const {hemisphere, month, date } = route.params
+  const [isFish, setIsFish] = useState(true);
+  const [isBugs, setIsBugs] = useState(false);
+  const [isSea, setIsSea] = useState(false); 
+
+
+  setFishView = () => {
+    setIsFish(true);
+    setIsBugs(false);
+    setIsSea(false); 
+  }
+
+  setBugView = () => {
+    setIsFish(false);
+    setIsBugs(true);
+    setIsSea(false); 
+  }
+
+  setSeaView = () => {
+    setIsFish(false);
+    setIsBugs(false);
+    setIsSea(true); 
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.header}>
+        <Text style={styles.headerText}>Critterpedia</Text>
+      </SafeAreaView>
+      <SafeAreaView style={styles.body}>
+        <SafeAreaView style={styles.creaturePicker}>
+          <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setBugView(this)}
+            style={styles.creaturePickerCircle}>
+            <Image 
+              style={isBugs? styles.creaturePickerBugSelected : styles.creaturePickerBug}
+              source={require('./assets/GeneralBug.png')}
+              />
+          </TouchableHighlight>
+          <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setFishView(this)}
+            style={styles.creaturePickerCircle}>
+            <Image 
+              style={isFish? styles.creaturePickerFishSelected : styles.creaturePickerFish}
+              source={require('./assets/GeneralFish.png')}
+              />
+          </TouchableHighlight>
+          <TouchableHighlight
+            underlayColor='none'
+            onPress={() => setSeaView(this)}
+            style={styles.creaturePickerCircle}>
+            <Image 
+              style={isSea? styles.creaturePickerCreatureSelected : styles.creaturePickerCreature}
+              source={require('./assets/GeneralSeaCreature.png')}
+              />
+          </TouchableHighlight>
+        </SafeAreaView>
+        <View> 
+          {isFish ? <FishPedia/> : (isBugs ? <BugPedia/> : <SeaPedia />)}
+          </View>
+
+      </SafeAreaView>
+
+    
+      <View style={styles.nav}>
+      <TouchableHighlight
+        style={styles.navItem}
+        underlayColor='none'
+        onPress={() => navigation.navigate('Change Location and Time')}>
+        <Image
+          source={require('./assets/clock-pngrepo-com.png')}
+          style={styles.navIcon}>
+          </Image>
+          
+      </TouchableHighlight>
+      <TouchableHighlight
+      style={styles.navItem}
+      underlayColor='none'
+      onPress={() => navigation.navigate('Creatures Available Now', {
+              hemisphere: hemisphere,
+              month: month,
+              date: date,
+      })}>
+        <Image 
+        source={require('./assets/bug-net-pngrepo-com.png')}
+        style={styles.navIcon}></Image>
+      </TouchableHighlight>
+      <TouchableHighlight
+        style={styles.navItemSelected}
+        underlayColor='none'
+        onPress={() => navigation.navigate('Critterpedia', {
+              hemisphere: hemisphere,
+              month: month,
+              date: date,
+        })}
+        >
+        <Image
+          source={{
+            uri: 'https://dodo.ac/np/images/0/0e/Menu_Critterpedia_NH_Icon.png'
+          }} 
+          style={styles.navIcon}>
+          </Image>
+          
+          
+      </TouchableHighlight>
+      </View>
+    </SafeAreaView>
+  )
+}
+
 
 
 
@@ -460,9 +428,18 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Enter Details">
-        <Stack.Screen name="Change Location and Time" component={EnterDetails} />
-        <Stack.Screen name="Creatures Available Now" component={AvailableNow} />
+      <Stack.Navigator 
+      initialRouteName="Enter Details"
+      screenOptions={{headerLeft: false, title: "CritterLog", headerTintColor: "#fff", headerStyle: {backgroundColor: "#74e0aa"}}}
+      
+      
+      >
+        <Stack.Screen name="Change Location and Time" component={EnterDetails} 
+        options={{animationEnabled: false}}/>
+        <Stack.Screen name="Creatures Available Now" component={AvailableNow}
+        options={{animationEnabled: false}} />
+        <Stack.Screen name="Critterpedia" component={Critterpedia} 
+        options={{animationEnabled: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -610,6 +587,12 @@ const styles = StyleSheet.create({
     tintColor: '#8d7b67',
     backgroundColor: '#f5f7e1',    
   },
+  creaturePickerBugSelected: {
+    width: 28,
+    height: 28,
+    tintColor: '#f8cb65',
+    backgroundColor: '#f5f7e1',    
+  },
   creaturePickerFish: {
     width: 35,
     height: 35,
@@ -617,10 +600,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f7e1',    
     borderRadius: 35/2
   },
+  creaturePickerFishSelected: {
+    width: 35,
+    height: 35,
+    tintColor: '#f8cb65',
+    backgroundColor: '#f5f7e1',    
+    borderRadius: 35/2
+  },
   creaturePickerCreature: {
     width: 40,
     height: 40,
     tintColor: '#8d7b67',
+    backgroundColor: '#f5f7e1',    
+    borderRadius: 40/2
+  },
+  creaturePickerCreatureSelected: {
+    width: 40,
+    height: 40,
+    tintColor: '#f8cb65',
     backgroundColor: '#f5f7e1',    
     borderRadius: 40/2
   },
@@ -665,11 +662,26 @@ const styles = StyleSheet.create({
     width: 40,
     justifyContent: 'space-around',
     marginTop: 10,
+    alignItems: 'center'
+  },
+  navItem: {
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
+  navItemSelected: {
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    backgroundColor: '#b1c491'
   },
   nav: {
     justifyContent: 'space-evenly',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    backgroundColor: '#DEF4B9',
+    height: 60
   }
+
 });
 
 
